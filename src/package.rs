@@ -1,9 +1,12 @@
+use std::collections::HashMap;
+
 pub struct Package {
     pub name: String,
     pub version: String,
     pub resolved: String,
     pub integrity: String,
     pub dest: String,
+    pub bin: Option<HashMap<String, String>>,
 }
 
 impl Package {

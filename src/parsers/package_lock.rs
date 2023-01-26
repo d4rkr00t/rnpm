@@ -42,6 +42,7 @@ pub fn parse(file_content: &str) -> PackagesVec {
             resolved: value.resolved.unwrap(),
             integrity: value.integrity.unwrap(),
             dest: key.to_string(),
+            bin: value.bin.to_owned(),
         })
     }
 

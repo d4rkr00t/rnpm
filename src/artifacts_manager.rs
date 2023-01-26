@@ -37,11 +37,11 @@ impl ArtifactsManager {
     pub fn fetch(&self, name: &str, req_url: &str) -> Result<(), ()> {
         let artifact_storage_path = self.get_tar_path(name);
         if artifact_storage_path.exists() {
-            println!("Cached {}", req_url);
+            // println!("Cached {}", req_url);
             return Ok(());
         }
 
-        println!("Downloading {}", req_url);
+        // println!("Downloading {}", req_url);
         let mut file = File::create(artifact_storage_path).unwrap();
         let body = reqwest::blocking::get(req_url).unwrap();
         let mut content = Cursor::new(body.bytes().unwrap());
