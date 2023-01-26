@@ -22,6 +22,10 @@ impl NpmStrategy {
 
     pub fn install(&self, packages: &PackagesVec, am: &ArtifactsManager) -> Result<(), ()> {
         packages.par_iter().for_each(|pkg| {
+            if pkg.is_bundled {
+                return;
+            }
+
             am.fetch(&pkg.get_id(), &pkg.resolved).unwrap();
 
             let dest_path = self.working_directory.join(&pkg.dest);
@@ -92,3 +96,4 @@ impl NpmStrategy {
 }
 
 // TODO: make sure .package-lock.json matches what npm produces
+// TODO: support postinstall scripts
