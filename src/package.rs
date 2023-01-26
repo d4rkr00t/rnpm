@@ -7,6 +7,7 @@ pub struct Package {
     pub integrity: String,
     pub dest: String,
     pub bin: Option<HashMap<String, String>>,
+    pub is_bundled: bool,
 }
 
 impl Package {

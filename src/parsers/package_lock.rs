@@ -15,11 +15,19 @@ struct PackageLock {
 #[derive(Debug, Deserialize, Clone)]
 pub struct PackageLockPackage {
     pub version: String,
-    pub resolved: Option<String>,
-    pub integrity: Option<String>,
     pub bin: Option<HashMap<String, String>>,
-    #[serde(rename(deserialize = "hasInstallScript"))]
-    pub has_install_script: Option<bool>,
+
+    #[serde(default)]
+    pub resolved: String,
+
+    #[serde(default)]
+    pub integrity: String,
+
+    #[serde(rename(deserialize = "inBundle"), default)]
+    pub in_bundle: bool,
+
+    #[serde(rename(deserialize = "hasInstallScript"), default)]
+    pub has_install_script: bool,
 }
 
 pub fn parse(file_content: &str) -> PackagesVec {
@@ -39,8 +47,9 @@ pub fn parse(file_content: &str) -> PackagesVec {
         packages_vec.push(Package {
             name,
             version: value.version,
-            resolved: value.resolved.unwrap(),
-            integrity: value.integrity.unwrap(),
+            resolved: value.resolved,
+            is_bundled: value.in_bundle,
+            integrity: value.integrity,
             dest: key.to_string(),
             bin: value.bin.to_owned(),
         })
