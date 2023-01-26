@@ -101,3 +101,11 @@ impl ArtifactsManager {
         return Ok(());
     }
 }
+
+// Artifacts storage:
+//  com.rnpm.rnpm
+//  └── artifacts
+//      ├── tars
+//      │   ├── @babel__core__7.12.3.tgz
+//      │   ├── @babel__generator__7.12.5.tgz
+//      └── tmp <- temp dir to copy tars and unpack
