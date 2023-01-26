@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::env;
 
 use directories::ProjectDirs;
 
@@ -8,22 +8,31 @@ mod parsers;
 mod strategies;
 
 fn main() {
-    let contents = std::fs::read_to_string("example/package-lock.json").unwrap();
+    let cwd = env::current_dir().unwrap();
+    let package_lock_path = cwd.join("package-lock.json");
+    let contents = std::fs::read_to_string(package_lock_path).unwrap();
     let packages = parsers::package_lock::parse(&contents);
     let proj_dir = ProjectDirs::from("com", "rnpm", "rnpm").unwrap();
-    let dir_path = PathBuf::from("/Users/ssysoev/Development/rnpm/example/");
 
     let am = artifacts_manager::ArtifactsManager::new(proj_dir.data_dir());
     am.init().unwrap();
 
-    let npm_strat = strategies::npm::NpmStrategy::new(dir_path);
+    let npm_strat = strategies::npm::NpmStrategy::new(cwd);
 
     println!("Artifacts: \"{}\"", am.artifacts_path.display());
     println!("");
 
     npm_strat.install(&packages, &am).unwrap();
+
+    println!("Done! Installed {} packages...", packages.len());
 }
 
 // https://pnpm.io/symlinked-node-modules-structure
 // https://github.com/oven-sh/bun/blob/main/src/install/npm.zig
 // https://github.com/npm/npm-registry-fetch/blob/main/lib/index.js#L108
+//
+// TODO: use cwd
+// TODO: proper cli interface
+// TODO: proper error handling
+// TODO: proper logging - default, verbose, etc...
+// TODO: test outputs

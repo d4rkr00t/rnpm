@@ -102,6 +102,8 @@ impl ArtifactsManager {
     }
 }
 
+// TODO: ungzip before saving to artifscts/tars
+//
 // Artifacts storage:
 //  com.rnpm.rnpm
 //  └── artifacts
