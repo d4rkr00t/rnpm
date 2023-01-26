@@ -1,2 +1,2 @@
 #!/bin/bash
-diff -qr example/node_modules example/node_modules_orig
+diff -qr ./node_modules ./node_modules_orig
