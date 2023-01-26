@@ -42,10 +42,14 @@ impl ArtifactsManager {
         }
 
         // println!("Downloading {}", req_url);
-        let mut file = File::create(artifact_storage_path).unwrap();
-        let body = reqwest::blocking::get(req_url).unwrap();
-        let mut content = Cursor::new(body.bytes().unwrap());
-        io::copy(&mut content, &mut file).unwrap();
+        let mut file = File::create(&artifact_storage_path).unwrap();
+        if let Ok(body) = reqwest::blocking::get(req_url) {
+            let mut content = Cursor::new(body.bytes().unwrap());
+            io::copy(&mut content, &mut file).unwrap();
+        } else {
+            fs::remove_file(artifact_storage_path).unwrap();
+            return Err(());
+        }
 
         Ok(())
     }

@@ -97,3 +97,4 @@ impl NpmStrategy {
 
 // TODO: make sure .package-lock.json matches what npm produces
 // TODO: support postinstall scripts
+// TODO: define package-lock.json supported version range
