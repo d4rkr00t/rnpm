@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use std::collections::{BTreeMap, HashMap};
 
+use crate::package::{Package, PackagesVec};
+
 // https://docs.npmjs.com/cli/v9/configuring-npm/package-lock-json#file-format
 #[derive(Debug, Deserialize)]
 struct PackageLock {
@@ -20,34 +22,6 @@ pub struct PackageLockPackage {
     pub has_install_script: Option<bool>,
 }
 
-// {
-//   name_to_id: {
-//      @babel/code-frame@7.18.6: 0,
-//      @babel/code-generator@7.20.7: 1,
-//      ...
-//      @rollup/plugin-sucrase@2.0.2: 10
-//      estree-walker@2.0.2: 11
-//   },
-//   packages: [
-//      {@babel/code-frame@7.18.6, top_level},
-//      {@babel/code-generator@7.18.6, top_level},
-//      ...
-//      {@rollup/plugin-surcase@2.0.2, top_level},
-//      {estree-walker@2.0.2},
-//   ],
-//   dependencies:[
-//      [],
-//      []
-//      ...
-//      [11],
-//      []
-//   ]
-// }
-//
-// [(dest_path, package)]
-
-pub type PackagesVec = Vec<(String, String, PackageLockPackage)>;
-
 pub fn parse(file_content: &str) -> PackagesVec {
     let package_lock: PackageLock = serde_json::from_str(file_content).unwrap();
     let mut packages_vec: PackagesVec = Vec::new();
@@ -60,9 +34,15 @@ pub fn parse(file_content: &str) -> PackagesVec {
         let mut names: Vec<&str> = key["node_modules/".len()..]
             .split("/node_modules/")
             .collect();
-        let name = names.pop().unwrap().replace("@", "__").replace("/", "__");
-        let id = format!("{}__{}", name, value.version);
-        packages_vec.push((key, id, value));
+        let name = names.pop().unwrap().to_string();
+
+        packages_vec.push(Package {
+            name,
+            version: value.version,
+            resolved: value.resolved.unwrap(),
+            integrity: value.integrity.unwrap(),
+            dest: key.to_string(),
+        })
     }
 
     return packages_vec;
