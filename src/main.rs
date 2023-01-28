@@ -20,7 +20,7 @@ fn main() {
     let npm_strat = strategies::npm::NpmStrategy::new(cwd);
 
     println!("Artifacts: \"{}\"", am.artifacts_path.display());
-    println!("");
+    println!("Installing {} packages...", packages.len());
 
     npm_strat.install(&packages, &am).unwrap();
 
@@ -31,8 +31,8 @@ fn main() {
 // https://github.com/oven-sh/bun/blob/main/src/install/npm.zig
 // https://github.com/npm/npm-registry-fetch/blob/main/lib/index.js#L108
 //
-// TODO: use cwd
 // TODO: proper cli interface
 // TODO: proper error handling
 // TODO: proper logging - default, verbose, etc...
 // TODO: test outputs
+// TODO: deduplicate packages by id

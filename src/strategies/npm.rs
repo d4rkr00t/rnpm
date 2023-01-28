@@ -22,6 +22,7 @@ impl NpmStrategy {
 
     pub fn install(&self, packages: &PackagesVec, am: &ArtifactsManager) -> Result<(), ()> {
         packages.par_iter().for_each(|pkg| {
+            // packages.iter().for_each(|pkg| {
             if pkg.is_bundled {
                 return;
             }
@@ -29,7 +30,7 @@ impl NpmStrategy {
             am.fetch(&pkg.get_id(), &pkg.resolved).unwrap();
 
             let dest_path = self.working_directory.join(&pkg.dest);
-            am.unpack_to(&pkg.get_id(), &dest_path).unwrap();
+            am.clone_to(&pkg.get_id(), &dest_path).unwrap();
 
             self.link_bin(&pkg, &dest_path).unwrap();
         });
