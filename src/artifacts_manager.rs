@@ -86,6 +86,12 @@ impl ArtifactsManager {
 
         for file in arch.entries().unwrap() {
             let mut file = file.unwrap();
+            let header = file.header();
+
+            if header.entry_type().is_dir() {
+                continue;
+            }
+
             let file_path = file.path().unwrap().to_path_buf();
             let mut file_path_cmp = file_path.components();
 
@@ -98,6 +104,7 @@ impl ArtifactsManager {
             let mut hasher = Sha1::new();
             hasher.update(pkg_id.as_bytes());
             hasher.update(clean_file_path_str);
+            hasher.update(header.cksum().unwrap().to_string());
             let hash = format!("{:x}", hasher.finalize());
 
             let dest_path = self.artifacts_files_path.join(&hash);

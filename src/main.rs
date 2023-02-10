@@ -17,12 +17,12 @@ fn main() {
     let am = artifacts_manager::ArtifactsManager::new(proj_dir.data_dir());
     am.init().unwrap();
 
-    let npm_strat = strategies::npm::NpmStrategy::new(cwd);
+    let npm_start = strategies::npm::NpmStrategy::new(cwd);
 
     println!("Artifacts: \"{}\"", am.artifacts_path.display());
     println!("Installing {} packages...", packages.len());
 
-    npm_strat.install(&packages, &am).unwrap();
+    npm_start.install(&packages, &am).unwrap();
 
     println!("Done! Installed {} packages...", packages.len());
 }

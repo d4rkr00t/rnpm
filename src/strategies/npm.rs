@@ -15,6 +15,9 @@ pub struct NpmStrategy {
     working_directory: PathBuf,
 }
 
+const PACKAGE_LOCK: &str = "package-lock.json";
+const NODE_MODULES: &str = "node_modules";
+
 impl NpmStrategy {
     pub fn new(working_directory: PathBuf) -> Self {
         Self { working_directory }
@@ -41,23 +44,23 @@ impl NpmStrategy {
     }
 
     fn get_lock_file_path(&self) -> PathBuf {
-        return self.working_directory.join("package-lock.json");
+        return self.working_directory.join(PACKAGE_LOCK);
     }
 
     fn get_node_modules_path(&self) -> PathBuf {
-        return self.working_directory.join("node_modules");
+        return self.working_directory.join(NODE_MODULES);
     }
 
     fn get_node_modules_bin_path(&self) -> PathBuf {
         return self
             .working_directory
-            .join(PathBuf::from("node_modules/.bin"));
+            .join(PathBuf::from(format!("{NODE_MODULES}/.bin")));
     }
 
     fn copy_lock_file(&self) -> Result<(), ()> {
         let node_modules_path = self.get_node_modules_path();
         let lock_file_path = self.get_lock_file_path();
-        let lock_file_dest_path = node_modules_path.join(".package-lock.json");
+        let lock_file_dest_path = node_modules_path.join(format!(".{PACKAGE_LOCK}"));
 
         if !lock_file_path.exists() {
             return Err(());
