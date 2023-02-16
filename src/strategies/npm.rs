@@ -1,14 +1,14 @@
+use rayon::prelude::*;
 use std::{
     fs::{self, File},
     io,
     path::PathBuf,
 };
 
-use rayon::prelude::*;
-
 use crate::{
     artifacts_manager::ArtifactsManager,
     package::{Package, PackagesVec},
+    parsers::package_json,
 };
 
 pub struct NpmStrategy {
@@ -35,11 +35,38 @@ impl NpmStrategy {
             let dest_path = self.working_directory.join(&pkg.dest);
             am.clone_to(&pkg.get_id(), &dest_path).unwrap();
 
-            self.link_bin(&pkg, &dest_path).unwrap();
+            if pkg.is_top_level {
+                self.link_bin(&pkg, &dest_path).unwrap();
+            }
         });
 
         self.copy_lock_file().unwrap();
 
+        return Ok(());
+    }
+
+    pub fn run_scripts(&self, packages: &PackagesVec) -> Result<(), ()> {
+        packages.par_iter().for_each(|pkg| {
+            if pkg.has_install_scripts {
+                return;
+            }
+
+            let dest_path = self.working_directory.join(&pkg.dest);
+            let package_json_path = dest_path.join("package.json");
+            let package_json_content = std::fs::read_to_string(package_json_path).unwrap();
+            let pkg_json = package_json::parse(&package_json_content);
+            if let Some(scripts) = pkg_json.scripts {
+                if scripts.contains_key("install") {
+                    let install_script = scripts.get("install").unwrap();
+                    let dest_path_string = dest_path.display();
+                    let output = execute!(
+                        r"cd '{dest_path_string}'
+                        {install_script}"
+                    );
+                    println!("{:?}", output);
+                }
+            }
+        });
         return Ok(());
     }
 

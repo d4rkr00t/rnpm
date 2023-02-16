@@ -1,5 +1,8 @@
 use std::env;
 
+#[macro_use]
+extern crate commandspec;
+
 use directories::ProjectDirs;
 
 mod artifacts_manager;
@@ -17,12 +20,13 @@ fn main() {
     let am = artifacts_manager::ArtifactsManager::new(proj_dir.data_dir());
     am.init().unwrap();
 
-    let npm_start = strategies::npm::NpmStrategy::new(cwd);
+    let npm_strat = strategies::npm::NpmStrategy::new(cwd);
 
     println!("Artifacts: \"{}\"", am.artifacts_path.display());
     println!("Installing {} packages...", packages.len());
 
-    npm_start.install(&packages, &am).unwrap();
+    npm_strat.install(&packages, &am).unwrap();
+    npm_strat.run_scripts(&packages).unwrap();
 
     println!("Done! Installed {} packages...", packages.len());
 }

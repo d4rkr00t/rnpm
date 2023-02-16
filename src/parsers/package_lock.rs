@@ -42,9 +42,11 @@ pub fn parse(file_content: &str) -> PackagesVec {
         let mut names: Vec<&str> = key["node_modules/".len()..]
             .split("/node_modules/")
             .collect();
+        let is_top_level = names.len() == 1;
         let name = names.pop().unwrap().to_string();
 
         packages_vec.push(Package {
+            is_top_level,
             name,
             version: value.version,
             resolved: value.resolved,
@@ -52,6 +54,7 @@ pub fn parse(file_content: &str) -> PackagesVec {
             integrity: value.integrity,
             dest: key.to_string(),
             bin: value.bin.to_owned(),
+            has_install_scripts: value.has_install_script,
         })
     }
 

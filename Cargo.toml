@@ -14,6 +14,7 @@ flate2 = "1.0"
 tar = "0.4"
 directories = "4.0"
 sha1 = "0.10.5"
+commandspec = "0.12"
 
 [profile.release]
 debug = true
