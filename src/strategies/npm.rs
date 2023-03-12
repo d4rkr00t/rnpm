@@ -23,7 +23,12 @@ impl NpmStrategy {
         Self { working_directory }
     }
 
-    pub fn install(&self, packages: &PackagesVec, am: &ArtifactsManager) -> Result<(), ()> {
+    pub fn install(
+        &self,
+        packages: &PackagesVec,
+        am: &ArtifactsManager,
+        should_run_scripts: bool,
+    ) -> Result<(), ()> {
         packages.par_iter().for_each(|pkg| {
             // packages.iter().for_each(|pkg| {
             if pkg.is_bundled {
@@ -33,19 +38,41 @@ impl NpmStrategy {
             am.fetch(&pkg.get_id(), &pkg.resolved).unwrap();
 
             let dest_path = self.working_directory.join(&pkg.dest);
-            am.clone_to(&pkg.get_id(), &dest_path).unwrap();
+            let mut should_clone = true;
+
+            if dest_path.exists() {
+                let package_json_path = dest_path.join("package.json");
+                if package_json_path.exists() {
+                    let pj = package_json::parse_from_path(&package_json_path);
+                    if pj.version == pkg.version {
+                        should_clone = false;
+                    } else {
+                        // println!("Removing: {}", dest_path.display());
+                        // fs::remove_dir_all(&dest_path).unwrap();
+                    }
+                }
+            }
+
+            if should_clone {
+                // println!("Cloning: {}", dest_path.display());
+                am.clone_to(&pkg.get_id(), &dest_path).unwrap();
+            }
 
             if pkg.is_top_level {
                 self.link_bin(&pkg, &dest_path).unwrap();
             }
         });
 
+        if should_run_scripts {
+            self.run_scripts(packages)?;
+        }
+
         self.copy_lock_file().unwrap();
 
         return Ok(());
     }
 
-    pub fn run_scripts(&self, packages: &PackagesVec) -> Result<(), ()> {
+    fn run_scripts(&self, packages: &PackagesVec) -> Result<(), ()> {
         packages.par_iter().for_each(|pkg| {
             if pkg.has_install_scripts {
                 return;

@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     fs::{self, File},
-    io::{self, Cursor, Write},
+    io::{Cursor, Write},
     path::{Path, PathBuf},
 };
 
@@ -36,11 +36,11 @@ impl ArtifactsManager {
     pub fn fetch(&self, pkg_id: &str, req_url: &str) -> Result<(), ()> {
         let pkg_manifest_path = self.get_pkg_manifest_path(pkg_id);
         if pkg_manifest_path.exists() {
-            println!("Cached {}", req_url);
+            // println!("Cached {}", req_url);
             return Ok(());
         }
 
-        println!("Downloading {}", req_url);
+        // println!("Downloading {}", req_url);
         if let Ok(body) = reqwest::blocking::get(req_url) {
             let mut content = Cursor::new(body.bytes().unwrap());
             let mut tar = GzDecoder::new(&mut content);
@@ -59,18 +59,18 @@ impl ArtifactsManager {
         }
         let pkg_manifest_content = std::fs::read_to_string(pkg_manifest_path).unwrap();
         let pkg_manifest: PackageManifest = serde_json::from_str(&pkg_manifest_content).unwrap();
+        let mut created = std::collections::HashSet::new();
 
         for (file_dest, file_src) in pkg_manifest.files.iter() {
             let file_dest_path = dest_path.join(file_dest);
             let file_src_path = self.artifacts_files_path.join(file_src);
-            let mut dir_path = file_dest_path.clone();
-            dir_path.pop();
-            fs::create_dir_all(&dir_path).unwrap();
+            let dir_path = file_dest_path.parent().unwrap().to_owned();
+            if !created.contains(&dir_path) {
+                fs::create_dir_all(&dir_path).unwrap();
+                created.insert(dir_path);
+            }
 
-            let mut file_dest = File::create(&file_dest_path).unwrap();
-            let mut file_src = File::open(&file_src_path).unwrap();
-
-            io::copy(&mut file_src, &mut file_dest).unwrap();
+            reflink::reflink_or_copy(file_src_path, file_dest_path).unwrap();
         }
 
         return Ok(());
@@ -134,7 +134,7 @@ struct PackageManifest {
 // Artifacts storage:
 //  com.rnpm.rnpm
 //  └── artifacts
-//      ├── files
+//      └── files
 //          ├── hash_of_a_file
 //          ├── hash_of_a_file
 //          ├── hash_of_a_file

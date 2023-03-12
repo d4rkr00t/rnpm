@@ -25,8 +25,7 @@ fn main() {
     println!("Artifacts: \"{}\"", am.artifacts_path.display());
     println!("Installing {} packages...", packages.len());
 
-    npm_strat.install(&packages, &am).unwrap();
-    npm_strat.run_scripts(&packages).unwrap();
+    npm_strat.install(&packages, &am, false).unwrap();
 
     println!("Done! Installed {} packages...", packages.len());
 }
@@ -34,6 +33,7 @@ fn main() {
 // https://pnpm.io/symlinked-node-modules-structure
 // https://github.com/oven-sh/bun/blob/main/src/install/npm.zig
 // https://github.com/npm/npm-registry-fetch/blob/main/lib/index.js#L108
+// https://github.com/orogene/orogene/issues/194
 //
 // TODO: proper cli interface
 // TODO: proper error handling
