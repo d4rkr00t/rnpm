@@ -36,11 +36,9 @@ impl ArtifactsManager {
     pub fn fetch(&self, pkg_id: &str, req_url: &str) -> Result<(), ()> {
         let pkg_manifest_path = self.get_pkg_manifest_path(pkg_id);
         if pkg_manifest_path.exists() {
-            // println!("Cached {}", req_url);
             return Ok(());
         }
 
-        // println!("Downloading {}", req_url);
         if let Ok(body) = reqwest::blocking::get(req_url) {
             let mut content = Cursor::new(body.bytes().unwrap());
             let mut tar = GzDecoder::new(&mut content);

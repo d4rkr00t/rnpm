@@ -46,15 +46,11 @@ impl NpmStrategy {
                     let pj = package_json::parse_from_path(&package_json_path);
                     if pj.version == pkg.version {
                         should_clone = false;
-                    } else {
-                        // println!("Removing: {}", dest_path.display());
-                        // fs::remove_dir_all(&dest_path).unwrap();
                     }
                 }
             }
 
             if should_clone {
-                // println!("Cloning: {}", dest_path.display());
                 am.clone_to(&pkg.get_id(), &dest_path).unwrap();
             }
 
