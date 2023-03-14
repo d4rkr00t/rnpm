@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, time::Instant};
 
 #[macro_use]
 extern crate commandspec;
@@ -11,6 +11,7 @@ mod parsers;
 mod strategies;
 
 fn main() {
+    let start = Instant::now();
     let cwd = env::current_dir().unwrap();
     let package_lock_path = cwd.join("package-lock.json");
     let contents = std::fs::read_to_string(package_lock_path).unwrap();
@@ -27,7 +28,12 @@ fn main() {
 
     npm_strat.install(&packages, &am, false).unwrap();
 
-    println!("Done! Installed {} packages...", packages.len());
+    let duration = start.elapsed();
+    println!(
+        "Done! Installed {} packages in {:?}ms",
+        packages.len(),
+        duration.as_millis()
+    );
 }
 
 // https://pnpm.io/symlinked-node-modules-structure
