@@ -3,6 +3,9 @@ node_modules
 node_modules_orig
 example/artifacts/
 oro-cache
+pnpm-cache
+pnpm-lock.yaml
+__example__/*/*.md
 __example__/benchmark/bun.lockb
 flamegraph.svg
 __example__/benchmark/package-lock.kdl
